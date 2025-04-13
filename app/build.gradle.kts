@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -10,7 +11,12 @@ android {
     namespace = "app.recruit.jettnote"
     compileSdk = 35
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
+
         applicationId = "app.recruit.jettnote"
         minSdk = 33
         targetSdk = 35

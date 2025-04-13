@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -41,7 +43,8 @@ fun WeatherAppBar(
     elevation: Dp,
     navController: NavController,
     onAddActionClicked: () -> Unit = {},
-    onButtonClicked: () -> Unit = {}
+    onButtonClicked: () -> Unit = {},
+
 ) {
     Surface(
         modifier = Modifier
@@ -51,22 +54,19 @@ fun WeatherAppBar(
         color = Color(0xFF6FA6D0) // Matching the medium blue from your gradient
     ) {
 
-    TopAppBar(
+    CenterAlignedTopAppBar(
         title = {
             Text(
                 text = title,
-                color = androidx.compose.ui.graphics.Color.Black,
-                style = androidx.compose.ui.text.TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                ),
-                modifier = Modifier.padding(start = 60.dp).fillMaxWidth(),
-                textAlign = TextAlign.Center
+                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp),
+                color = Color.Black
             )
         },
         actions = {
             if (isMainScreen) {
-                IconButton(onClick = {}) {
+                IconButton(onClick = {
+                    onAddActionClicked.invoke()
+                }) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "search icon")
                 }
                 IconButton(onClick = {}) {
@@ -79,7 +79,8 @@ fun WeatherAppBar(
         navigationIcon = {
             if (icon != null) {
                 Icon(
-                    imageVector = icon, contentDescription = "Null",
+                    imageVector = icon,
+                    contentDescription = "Null",
                     tint = androidx.compose.ui.graphics.Color.Black,
                     modifier = androidx.compose.ui.Modifier
                         .padding(8.dp)

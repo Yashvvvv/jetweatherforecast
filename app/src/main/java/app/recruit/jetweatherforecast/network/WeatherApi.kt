@@ -1,5 +1,6 @@
 package app.recruit.jetweatherforecast.network
 
+import app.recruit.jetweatherforecast.model.Weather
 import app.recruit.jetweatherforecast.model.WeatherItem
 import app.recruit.jetweatherforecast.utils.Constants
 import retrofit2.http.GET
@@ -28,11 +29,11 @@ import javax.inject.Singleton
 @Singleton
 interface WeatherApi {
 
-    @GET(value = "data/2.5/weather")
+    @GET(value = "data/2.5/forecast/daily")
 
     suspend  fun getWeather(
         @Query("q") query : String,
         @Query("units") units: String = "imperial",
         @Query("appid") appId: String = Constants.API_KEY
-    ) : WeatherItem
+    ) : Weather
 }

@@ -1,20 +1,23 @@
 package app.recruit.jetweatherforecast.repository
 
+import android.R
 import app.recruit.jetweatherforecast.data.DataOrException
+import app.recruit.jetweatherforecast.model.Weather
 import app.recruit.jetweatherforecast.model.WeatherItem
 import app.recruit.jetweatherforecast.network.WeatherApi
 import javax.inject.Inject
 
-class WeatherRepository  @Inject constructor(private val api: WeatherApi){ //Get the data from the weatherApi using retrofit
-    suspend fun getWeather(cityQuery: String):
-            DataOrException<WeatherItem, Boolean, Exception> {
+class WeatherRepository @Inject constructor(private val api: WeatherApi) {
 
+    suspend fun getWeather(cityQuery: String, units: String)
+            : DataOrException<Weather, Boolean, Exception> {
         val response = try {
-            api.getWeather(query = cityQuery)
+            api.getWeather(query = cityQuery, units = units)
 
         } catch (e: Exception) {
             return DataOrException(e = e)
         }
-        return DataOrException(data = response) //return the data
+        return DataOrException(data = response)
+
     }
 }

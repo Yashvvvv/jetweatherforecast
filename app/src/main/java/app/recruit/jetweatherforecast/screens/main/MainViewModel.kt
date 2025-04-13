@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.recruit.jetweatherforecast.data.DataOrException
+import app.recruit.jetweatherforecast.model.Weather
 import app.recruit.jetweatherforecast.model.WeatherItem
 import app.recruit.jetweatherforecast.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,12 +17,12 @@ import javax.inject.Inject
 class MainViewModel  @Inject constructor(private val repository: WeatherRepository)
     : ViewModel(){
     //The `MainViewModel` class is responsible for managing the UI-related data in a lifecycle-conscious way. It interacts with the `WeatherRepository` to fetch weather data and provides it to the UI.
-        val data: MutableState<DataOrException<WeatherItem, Boolean, Exception>> =
+        val data: MutableState<DataOrException<Weather, Boolean, Exception>> =
         mutableStateOf(DataOrException(null, true, Exception("")))
 
     suspend fun getWeather(city: String)
-    : DataOrException<WeatherItem, Boolean, Exception>{
-        return repository.getWeather(cityQuery = city)
+    : DataOrException<Weather, Boolean, Exception>{
+        return repository.getWeather(cityQuery = city, units = "units")
     }
 }
 //    init {
