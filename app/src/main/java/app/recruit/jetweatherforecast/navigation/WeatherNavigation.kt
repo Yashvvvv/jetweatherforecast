@@ -10,7 +10,10 @@ import app.recruit.jetweatherforecast.screens.splash.WeatherSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import app.recruit.jetweatherforecast.screens.about.AboutScreen
+import app.recruit.jetweatherforecast.screens.favourites.FavouriteScreen
 import app.recruit.jetweatherforecast.screens.search.SearchScreen
+import app.recruit.jetweatherforecast.screens.settings.SettingsScreen
 
 
 //Will store the NavController
@@ -28,6 +31,7 @@ fun WeatherNavigation() {
 
         //www.google.com/cityname = "Seatle"
         val route = WeatherScreens.MainScreen.name
+
         composable("$route/{city}",
             arguments = listOf(
                 navArgument(name = "city")
@@ -45,6 +49,18 @@ fun WeatherNavigation() {
 
         composable(WeatherScreens.SearchScreen.name) {
             SearchScreen(navController = navController)
+        }
+
+        composable(WeatherScreens.FavouriteScreen.name) {
+            FavouriteScreen(navController = navController)
+        }
+
+        composable(WeatherScreens.AboutScreen.name) {
+            AboutScreen(navController = navController)
+        }
+
+        composable(WeatherScreens.SettingsScreen.name) {
+            SettingsScreen(navController = navController)
         }
     }
 }
