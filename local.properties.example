@@ -1,0 +1,8 @@
+# Copy this file to local.properties and replace with your own values
+# DO NOT commit local.properties to version control
+
+# SDK location - replace with your own SDK path
+sdk.dir=/path/to/your/android/sdk
+
+# API Keys - replace with your own API keys
+WEATHER_API_KEY=your_openweathermap_api_key_here 

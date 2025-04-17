@@ -50,12 +50,19 @@ JetWeatherForecast is a modern Android weather application built with Jetpack Co
 3. Sync Gradle files
 4. Run the app on an emulator or physical device
 
-## API Key
+## API Key Setup
 
-The app uses OpenWeatherMap API for weather data. You will need to:
+The app uses OpenWeatherMap API for weather data. To set up the API key securely:
 
 1. Register at [OpenWeatherMap](https://openweathermap.org/) to get an API key
-2. Replace the API key in the Constants file
+2. Copy the `local.properties.example` file to `local.properties` (this file is git-ignored)
+3. Add your API key to the `local.properties` file:
+   ```
+   WEATHER_API_KEY=your_openweathermap_api_key_here
+   ```
+4. Sync the project - the API key will be automatically included in the app via BuildConfig
+
+**Note**: Never commit your `local.properties` file to version control!
 
 ## Requirements
 
