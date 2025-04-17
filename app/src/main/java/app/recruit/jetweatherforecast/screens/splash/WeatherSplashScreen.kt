@@ -1,6 +1,6 @@
 package app.recruit.jetweatherforecast.screens.splash
 
-import app.recruit.jettnote.R
+import app.recruit.jetweatherforecast.R
 import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween

@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,9 +8,6 @@ plugins {
     id("com.google.devtools.ksp") // Use KSP instead of kapt
     id("dagger.hilt.android.plugin") // Apply Hilt plugin
 }
-
-import java.util.Properties
-import java.io.FileInputStream
 
 // Read local.properties
 val localProperties = Properties().apply {
@@ -18,7 +18,7 @@ val localProperties = Properties().apply {
 }
 
 android {
-    namespace = "app.recruit.jettnote"
+    namespace = "app.recruit.jetweatherforecast"
     compileSdk = 35
 
     buildFeatures {
@@ -27,7 +27,7 @@ android {
 
     defaultConfig {
 
-        applicationId = "app.recruit.jettnote"
+        applicationId = "app.recruit.jetweatherforecast"
         minSdk = 33
         targetSdk = 35
         versionCode = 1

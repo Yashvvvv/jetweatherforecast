@@ -21,7 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import app.recruit.jettnote.R
+import app.recruit.jetweatherforecast.R
 
 
 @Composable
