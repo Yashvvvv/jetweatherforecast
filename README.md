@@ -93,4 +93,4 @@ The app follows MVVM (Model-View-ViewModel) architecture pattern with clean arch
 ## Acknowledgements
 
 - Weather data provided by [OpenWeatherMap](https://openweathermap.org/)
-- Icons and design resources [Specify sources if applicable] 
+- Icons and design resources 
