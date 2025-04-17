@@ -95,7 +95,11 @@ The app follows MVVM (Model-View-ViewModel) architecture pattern with clean arch
 
 ## License
 
-[Specify your license here]
+This project is licensed under the MIT License - see below for details:
+
+MIT License
+
+Copyright (c) 2024
 
 ## Acknowledgements
 
