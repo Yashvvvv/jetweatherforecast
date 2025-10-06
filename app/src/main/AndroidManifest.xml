@@ -18,7 +18,7 @@
             android:name="app.recruit.jetweatherforecast.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.JetWeatherForecast">
+            android:theme="@style/Theme.JetWeatherForecast.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

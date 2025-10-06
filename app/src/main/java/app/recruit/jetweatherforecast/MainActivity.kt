@@ -21,6 +21,9 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Switch from splash theme to regular theme before calling super
+        setTheme(R.style.Theme_JetWeatherForecast)
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {

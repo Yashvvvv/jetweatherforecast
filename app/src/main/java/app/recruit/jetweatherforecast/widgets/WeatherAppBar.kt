@@ -6,15 +6,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.absolutePadding
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.MoreVert
@@ -28,7 +27,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -55,7 +53,7 @@ import app.recruit.jetweatherforecast.navigation.WeatherScreens
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherAppBar(
-    title :String = "Title",
+    title: String = "Title",
     icon: ImageVector? = null,
     isMainScreen: Boolean = true,
     elevation: Dp,
@@ -63,7 +61,10 @@ fun WeatherAppBar(
     onAddActionClicked: () -> Unit = {},
     onButtonClicked: () -> Unit = {},
     showRefreshButton: Boolean = false,
-    onRefreshClicked: () -> Unit = {}
+    onRefreshClicked: () -> Unit = {},
+    showFavoriteButton: Boolean = false,
+    isFavorite: Boolean = false,
+    onFavoriteClicked: () -> Unit = {}
 ) {
 
     val showDialog = remember {
@@ -103,6 +104,18 @@ fun WeatherAppBar(
                     }
                 }
 
+                if (showFavoriteButton) {
+                    IconButton(onClick = {
+                        onFavoriteClicked.invoke()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Favorite,
+                            contentDescription = "favorite icon",
+                            tint = if (isFavorite) Color.Red else Color.Black
+                        )
+                    }
+                }
+
                 IconButton(onClick = {
                     onAddActionClicked.invoke()
                 }) {
@@ -121,14 +134,13 @@ fun WeatherAppBar(
         },
         navigationIcon = {
             if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = "Null",
-                    tint = androidx.compose.ui.graphics.Color.Black,
-                    modifier = androidx.compose.ui.Modifier
-                        .padding(8.dp)
-                        .clickable { onButtonClicked.invoke() }
-                )
+                IconButton(onClick = { onButtonClicked.invoke() }) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = "Navigation Icon",
+                        tint = Color.Black
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(

@@ -2,4 +2,11 @@
 <resources>
 
     <style name="Theme.JetWeatherForecast" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Splash Screen Theme - Shows immediately on launch -->
+    <style name="Theme.JetWeatherForecast.Splash" parent="Theme.JetWeatherForecast">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:statusBarColor">@color/splash_blue</item>
+        <item name="android:navigationBarColor">@color/splash_blue</item>
+    </style>
 </resources>

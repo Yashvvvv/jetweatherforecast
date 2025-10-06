@@ -1,6 +1,5 @@
 package app.recruit.jetweatherforecast.screens.main
 
-import android.util.Log
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,15 +27,14 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -46,8 +44,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import app.recruit.jetweatherforecast.data.DataOrException
 import app.recruit.jetweatherforecast.model.Weather
+import app.recruit.jetweatherforecast.model.Favorite
+import app.recruit.jetweatherforecast.screens.favourites.FavoriteViewModel
 import app.recruit.jetweatherforecast.navigation.WeatherScreens
 import app.recruit.jetweatherforecast.ui.theme.GradientStart
 import app.recruit.jetweatherforecast.utils.formatDate
@@ -64,11 +63,19 @@ fun MainScreen(
     mainViewModel: MainViewModel = hiltViewModel(),
     city: String?
 ) {
-    val weatherData = produceState<DataOrException<Weather, Boolean, Exception>>(
-        initialValue = DataOrException(loading = true)
-    ) {
-        value = mainViewModel.getWeather(city = city.toString())
-    }.value
+    // Load weather data initially and whenever the city changes
+    LaunchedEffect(city) {
+        mainViewModel.data.value = mainViewModel.getWeather(city = city.toString())
+    }
+
+    // Check if we need to reload due to settings change
+    LaunchedEffect(navController.currentBackStackEntry) {
+        // This runs when we return to this screen
+        // Refresh weather data to reflect any unit changes
+        mainViewModel.refreshWeather(city.toString())
+    }
+
+    val weatherData by mainViewModel.data
 
     Box(
         modifier = Modifier
@@ -183,6 +190,11 @@ fun MainScaffold(
     navController: NavController,
     onRefresh: () -> Unit
 ) {
+    val favoriteViewModel: FavoriteViewModel = hiltViewModel()
+    val favoritesList = favoriteViewModel.favList.collectAsState().value
+
+    val isFavorite = favoritesList.any { it.city == weather.city.name }
+
     Scaffold(
         topBar = {
             WeatherAppBar(
@@ -193,7 +205,23 @@ fun MainScaffold(
                     navController.navigate(WeatherScreens.SearchScreen.name)
                 },
                 showRefreshButton = true,
-                onRefreshClicked = onRefresh
+                onRefreshClicked = onRefresh,
+                showFavoriteButton = true,
+                isFavorite = isFavorite,
+                onFavoriteClicked = {
+                    if (isFavorite) {
+                        favoritesList.find { it.city == weather.city.name }?.let {
+                            favoriteViewModel.deleteFavorite(it)
+                        }
+                    } else {
+                        favoriteViewModel.insertFavorite(
+                            Favorite(
+                                city = weather.city.name,
+                                country = weather.city.country
+                            )
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
