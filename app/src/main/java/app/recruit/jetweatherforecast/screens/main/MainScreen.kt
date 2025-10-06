@@ -2,8 +2,12 @@ package app.recruit.jetweatherforecast.screens.main
 
 import android.util.Log
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,15 +19,29 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,6 +49,7 @@ import androidx.navigation.NavController
 import app.recruit.jetweatherforecast.data.DataOrException
 import app.recruit.jetweatherforecast.model.Weather
 import app.recruit.jetweatherforecast.navigation.WeatherScreens
+import app.recruit.jetweatherforecast.ui.theme.GradientStart
 import app.recruit.jetweatherforecast.utils.formatDate
 import app.recruit.jetweatherforecast.utils.formatDecimal
 import app.recruit.jetweatherforecast.widgets.HumidityWindPressureRow
@@ -45,35 +64,137 @@ fun MainScreen(
     mainViewModel: MainViewModel = hiltViewModel(),
     city: String?
 ) {
-
     val weatherData = produceState<DataOrException<Weather, Boolean, Exception>>(
-    initialValue = DataOrException(loading = true)) {
-
+        initialValue = DataOrException(loading = true)
+    ) {
         value = mainViewModel.getWeather(city = city.toString())
-
     }.value
 
-    if (weatherData.loading ==true){
-        CircularProgressIndicator()
-    }else if (weatherData.data != null){
-        MainScaffold(weather = weatherData.data!!, navController)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        GradientStart.copy(alpha = 0.3f),
+                        Color.White,
+                        Color.White
+                    )
+                )
+            )
+    ) {
+        when {
+            weatherData.loading == true -> {
+                LoadingScreen()
+            }
+            weatherData.e != null -> {
+                ErrorScreen(
+                    errorMessage = weatherData.e?.message ?: "Unknown error occurred",
+                    onRetry = { mainViewModel.refreshWeather(city.toString()) }
+                )
+            }
+            weatherData.data != null -> {
+                MainScaffold(
+                    weather = weatherData.data!!,
+                    navController = navController,
+                    onRefresh = { mainViewModel.refreshWeather(city.toString()) }
+                )
+            }
+        }
     }
 }
 
 @Composable
-fun MainScaffold(weather: Weather, navController: NavController) {
+fun LoadingScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(60.dp),
+                color = MaterialTheme.colorScheme.primary,
+                strokeWidth = 4.dp
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Loading weather data...",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+    }
+}
+
+@Composable
+fun ErrorScreen(errorMessage: String, onRetry: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "⚠️ Oops!",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = onRetry,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "Retry")
+                    Spacer(modifier = Modifier.size(4.dp))
+                    Text("Retry")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MainScaffold(
+    weather: Weather,
+    navController: NavController,
+    onRefresh: () -> Unit
+) {
     Scaffold(
         topBar = {
             WeatherAppBar(
-                title = weather.city.name + " ,${weather.city.country}",
+                title = weather.city.name + ", ${weather.city.country}",
                 elevation = 10.dp,
                 navController = navController,
                 onAddActionClicked = {
                     navController.navigate(WeatherScreens.SearchScreen.name)
-                }
-            ) {
-                Log.d("TAG", "MainScaffold: Button Clicked")
-            }
+                },
+                showRefreshButton = true,
+                onRefreshClicked = onRefresh
+            )
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
@@ -84,129 +205,123 @@ fun MainScaffold(weather: Weather, navController: NavController) {
 
 @Composable
 fun MainContent(data: Weather) {
-
     val weatherItem = data.list[0]
     val imageUrl = "https://openweathermap.org/img/wn/${weatherItem.weather[0].icon}.png"
 
     Column(
-        modifier = Modifier.padding(4.dp)
-        .fillMaxWidth(),
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-
-        Text(text = formatDate(weatherItem.dt),
-            style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
+        modifier = Modifier
+            .padding(4.dp)
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = formatDate(weatherItem.dt),
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(6.dp),
-            color = androidx.compose.material3.MaterialTheme.colorScheme.onSecondaryContainer
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        // Enhanced Weather Display Card
+        Card(
+            modifier = Modifier
+                .padding(8.dp)
+                .size(280.dp),
+            shape = CircleShape,
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                Color(0xFF42A5F5),
+                                Color(0xFF1976D2),
+                                Color(0xFF0D47A1)
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = "Weather Icon",
+                        modifier = Modifier.size(80.dp)
+                    )
+
+                    Text(
+                        text = formatDecimal(weatherItem.temp.day) + "°",
+                        style = MaterialTheme.typography.displayLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White,
+                        fontSize = 56.sp
+                    )
+
+                    Text(
+                        text = weatherItem.weather[0].main,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White.copy(alpha = 0.95f),
+                        fontSize = 20.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "${weatherItem.humidity}%",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                        Text(
+                            text = " humidity",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+        HumidityWindPressureRow(weather = data.list[0])
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        SunsetSunriseRow(weather = data.list[0])
+
+        Text(
+            text = "7-Day Forecast",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold
         )
 
         Surface(
             modifier = Modifier
-                .padding(4.dp)
-                .size(250.dp)
-                .padding(4.dp),
-            shape = CircleShape,
-            shadowElevation = 20.dp,
-            color = Color.Transparent
+                .fillMaxWidth()
+                .fillMaxHeight(),
+            color = Color(0xFF6FA6D0).copy(alpha = 0.2f),
+            shape = RoundedCornerShape(size = 14.dp)
         ) {
-            // Outer gradient background
-            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
-                val outerGradient = androidx.compose.ui.graphics.Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF42A5F5),  // Lighter blue
-                        Color(0xFF1976D2),  // Medium blue
-                        Color(0xFF0D47A1)   // Dark blue
-                    ),
-                    center = androidx.compose.ui.geometry.Offset(size.width / 2, size.height / 2),
-                    radius = size.width / 1.2f
-                )
-                drawCircle(brush = outerGradient)
-            }
-
-            // Content with inner glow effect
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp), // Reduced padding for smaller surface
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
-                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+            LazyColumn(
+                modifier = Modifier.padding(2.dp),
+                contentPadding = PaddingValues(1.dp)
             ) {
-                // Weather icon with enhanced appearance
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = "Weather Icon",
-                    modifier = Modifier
-                        .size(50.dp) // Reduced icon size
-                        .padding(bottom = 2.dp)
-                )
-
-                Text(
-                    text = formatDecimal(weatherItem.temp.day) + "°",
-                    style = androidx.compose.material3.MaterialTheme.typography.headlineLarge,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold,
-                    color = Color.White,
-                    fontSize = 40.sp // Smaller font size
-                )
-
-                Text(
-                    text = weatherItem.weather[0].main,
-                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
-                    color = Color.White.copy(alpha = 0.95f),
-                    fontSize = 18.sp, // Smaller font size
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-
-                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(6.dp))
-
-                // Add humidity or another weather metric with subtle styling
-                androidx.compose.foundation.layout.Row(
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 4.dp) // Reduced padding
-                ) {
-                    Text(
-                        text = "${weatherItem.humidity}%",
-                        style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 14.sp // Slightly smaller font size
-                    )
-                    Text(
-                        text = " humidity",
-                        style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 14.sp // Slightly smaller font size
-                    )
+                items(items = data.list) {
+                    WeatherDetailsRow(data = it)
                 }
             }
         }
     }
-
-    Spacer(modifier = Modifier.height(10.dp))
-    HumidityWindPressureRow(weather = data.list[0])
-    HorizontalDivider(modifier = Modifier.padding(1.dp))
-    SunsetSunriseRow(weather = data.list[0])
-    Text(
-        text = "Weather Details",
-        style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-        modifier = Modifier
-            .fillMaxWidth()  // Makes the text component take full width
-            .padding(6.dp),
-        color = androidx.compose.material3.MaterialTheme.colorScheme.onSecondaryContainer,
-        textAlign = TextAlign.Center  // This only aligns text within the component
-    )
-
-    Surface(modifier = Modifier.fillMaxWidth()
-        .fillMaxHeight(),
-        color = Color(0xFF6FA6D0),
-        shape = RoundedCornerShape(size = 14.dp),
-        shadowElevation = 20.dp
-    ) {
-        LazyColumn(modifier = Modifier.padding(2.dp),
-            contentPadding = PaddingValues(1.dp)
-        ) {
-            items(items = data.list){
-                WeatherDetailsRow(data = it)
-            }}
-        }
-    }
+}

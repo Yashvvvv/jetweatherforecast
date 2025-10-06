@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.MoreVert
@@ -61,7 +62,8 @@ fun WeatherAppBar(
     navController: NavController,
     onAddActionClicked: () -> Unit = {},
     onButtonClicked: () -> Unit = {},
-
+    showRefreshButton: Boolean = false,
+    onRefreshClicked: () -> Unit = {}
 ) {
 
     val showDialog = remember {
@@ -93,6 +95,13 @@ fun WeatherAppBar(
         },
         actions = {
             if (isMainScreen) {
+                if (showRefreshButton) {
+                    IconButton(onClick = {
+                        onRefreshClicked.invoke()
+                    }) {
+                        Icon(imageVector = Icons.Default.Refresh, contentDescription = "refresh icon")
+                    }
+                }
 
                 IconButton(onClick = {
                     onAddActionClicked.invoke()

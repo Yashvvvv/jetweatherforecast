@@ -7,40 +7,39 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.recruit.jetweatherforecast.data.DataOrException
 import app.recruit.jetweatherforecast.model.Weather
-import app.recruit.jetweatherforecast.model.WeatherItem
 import app.recruit.jetweatherforecast.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel  @Inject constructor(private val repository: WeatherRepository)
-    : ViewModel(){
-    //The `MainViewModel` class is responsible for managing the UI-related data in a lifecycle-conscious way. It interacts with the `WeatherRepository` to fetch weather data and provides it to the UI.
-        val data: MutableState<DataOrException<Weather, Boolean, Exception>> =
+class MainViewModel @Inject constructor(private val repository: WeatherRepository)
+    : ViewModel() {
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    val data: MutableState<DataOrException<Weather, Boolean, Exception>> =
         mutableStateOf(DataOrException(null, true, Exception("")))
 
-    suspend fun getWeather(city: String)
-    : DataOrException<Weather, Boolean, Exception>{
-        return repository.getWeather(cityQuery = city, units = "units")
+    suspend fun getWeather(city: String, units: String = "metric")
+            : DataOrException<Weather, Boolean, Exception> {
+        return repository.getWeather(cityQuery = city, units = units)
+    }
+
+    fun refreshWeather(city: String) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            try {
+                data.value = getWeather(city)
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "Error refreshing weather", e)
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
     }
 }
-//    init {
-//        loadWeather()
-//    }
-//
-//    private fun loadWeather() {
-//        getWeather("London")
-//    }
-//
-//    private fun getWeather(city: kotlin.String) {
-//        viewModelScope.launch {
-//            if(city.isEmpty()) return@launch
-//            data.value.loading = true
-//            data.value = repository.getWeather(cityQuery = city)
-//
-//            if(data.value.data.toString().isEmpty()) data.value.loading = false
-//        }
-//        Log.d("TAG", "getWeather: ${data.value.data.toString()}")
-//    }
-//}
